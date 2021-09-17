@@ -1,0 +1,1 @@
+https://github.com/MrRio/jsPDF/blob/v2.4.0/dist/

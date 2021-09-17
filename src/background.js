@@ -1,12 +1,54 @@
-// background.js - this kicks off the WindowListener framework
+import './vendor/html2canvas/html2canvas.js';
+import './vendor/dompurify/purify.js';
+import './vendor/jsPDF/jspdf.umd.js';
 
+// Default export is a4 paper, portrait, using millimeters for units
+//let raw = "<html ><p style='word-spacing: 2pt; font-size: 10pt; border:1pt solid red'>It may sound counterintuitive, but don’t cut your marketing budget in a recession. Here are 3 ways to increase your marketing effectiveness.</p></html>";
+let raw = "<html><body><div style='border:1pt solid red'><p>It may sound counterintuitive, but don’t cut your marketing budget in a recession. Here are 3 ways to increase your marketing effectiveness.</p></div></body></html>";
+var html = new DOMParser().parseFromString(raw, "text/xml");
 
-// console.debug('background Start');
+/*
+html2canvas(html, {
+    onrendered: function (canvas) {
+		canvas.toBlob(function(blob){
+			browser.downloads.download({
+				'url': URL.createObjectURL(blob),
+				'filename': 'test.png',
+				'saveAs': true,
+			});
+		  },'image/png');
+    }
+  });
+
+*/
+let doc = new jspdf.jsPDF({ unit: "pt", format: "a4" });
+var pWidth = doc.internal.pageSize.getWidth();
+var pHeight = doc.internal.pageSize.getHeight();
+
+doc.html(raw, {
+	width: pWidth,
+	windowWidth: pWidth,
+	html2canvas: {
+		//backgroundColor: 'lightyellow',
+		width: pWidth, // this only affects backgroundColor, not content
+		height: pHeight,
+	},
+  	callback: function (doc) {
+		console.log(doc.output('blob'));
+		browser.downloads.download({
+			'url': URL.createObjectURL(doc.output('blob')),
+			'filename': 'test.pdf',
+			'saveAs': true,
+		});
+	}
+});
+//text("Hello world!", 10, 10);
+//doc.save("a4.pdf");
+
 
 messenger.WindowListener.registerDefaultPrefs("defaults/preferences/prefs.js");
 
 // Register all necessary content, Resources, and locales
-
 messenger.WindowListener.registerChromeUrl([
 	["content", "mboximport", "chrome/content/mboximport"],
 	["resource", "mboximport", "chrome/", "contentaccessible=yes"],
@@ -58,9 +100,9 @@ messenger.WindowListener.registerWindow(
 	"chrome://mboximport/content/mboximport/messageWindowOL.js");
 
 /* messenger.WindowListener.registerWindow(
- 	"chrome://mboximport/content/mboximport/pest.xhtml",
- 	"chrome://mboximport/content/mboximport/ptest.js"); */
-	
+	  "chrome://mboximport/content/mboximport/pest.xhtml",
+	  "chrome://mboximport/content/mboximport/ptest.js"); */
+
 /* messenger.WindowListener.registerWindow(
 	"chrome://messenger/content/msgPrintEngine.xhtml",
 	"chrome://mboximport/content/mboximport/msgPrintEngineOL.js"); */
