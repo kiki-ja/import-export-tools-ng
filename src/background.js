@@ -5,22 +5,37 @@ import './vendor/jsPDF/jspdf.umd.js';
 // Default export is a4 paper, portrait, using millimeters for units
 //let raw = "<html ><p style='word-spacing: 2pt; font-size: 10pt; border:1pt solid red'>It may sound counterintuitive, but don’t cut your marketing budget in a recession. Here are 3 ways to increase your marketing effectiveness.</p></html>";
 let raw = "<html><body><div style='border:1pt solid red'><p>It may sound counterintuitive, but don’t cut your marketing budget in a recession. Here are 3 ways to increase your marketing effectiveness.</p></div></body></html>";
-var html = new DOMParser().parseFromString(raw, "text/xml");
+let iframe = document.getElementById("frame").contentDocument;
+iframe.body.innerHTML = raw;
+
+
+/*var pdf = new jspdf.jsPDF('p','pt','a4');
+
+pdf.fromHTML(iframe.body, function() {
+	browser.downloads.download({
+		'url': URL.createObjectURL(pdf.output('blob')),
+		'filename': 'test.pdf',
+		'saveAs': true,
+	});
+});*/
+
+
+html2canvas(iframe.body).then(canvas => {
+	
+	var imgData = canvas.toDataURL(
+		'image/png');              
+	var doc = new jspdf.jsPDF('p', 'mm');
+	doc.addImage(imgData, 'PNG', 10, 10);	
+
+	browser.downloads.download({
+		'url': URL.createObjectURL(doc.output('blob')),
+		'filename': 'test.pdf',
+		'saveAs': true,
+	});
+});
+
 
 /*
-html2canvas(html, {
-    onrendered: function (canvas) {
-		canvas.toBlob(function(blob){
-			browser.downloads.download({
-				'url': URL.createObjectURL(blob),
-				'filename': 'test.png',
-				'saveAs': true,
-			});
-		  },'image/png');
-    }
-  });
-
-*/
 let doc = new jspdf.jsPDF({ unit: "pt", format: "a4" });
 var pWidth = doc.internal.pageSize.getWidth();
 var pHeight = doc.internal.pageSize.getHeight();
@@ -44,7 +59,7 @@ doc.html(raw, {
 });
 //text("Hello world!", 10, 10);
 //doc.save("a4.pdf");
-
+*/
 
 messenger.WindowListener.registerDefaultPrefs("defaults/preferences/prefs.js");
 
